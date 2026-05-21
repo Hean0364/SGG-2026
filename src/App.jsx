@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Database, Home as HomeIcon, Info, Map } from "lucide-react";
+import { Database, Home as HomeIcon, Map } from "lucide-react";
 import Home from "./pages/Home.jsx";
 import MapView from "./pages/MapView.jsx";
-import About from "./pages/About.jsx";
 
 const routes = {
   home: Home,
   map: MapView,
-  about: About,
 };
 
 function getRouteFromHash() {
@@ -60,14 +58,6 @@ export default function App() {
           >
             <Map size={17} aria-hidden="true" />
             <span>Mapa</span>
-          </button>
-          <button
-            className={route === "about" ? "nav-button active" : "nav-button"}
-            type="button"
-            onClick={() => navigate("about")}
-          >
-            <Info size={17} aria-hidden="true" />
-            <span>Acerca</span>
           </button>
         </nav>
       </header>

@@ -1,6 +1,6 @@
 # GIS Web GeoServer
 
-Aplicación GIS web académica construida con React + Vite para visualizar, consultar y comparar capas geográficas publicadas desde GeoServer mediante WMS. La vista 2D usa Leaflet y la vista 3D usa CesiumJS.
+Aplicación GIS web académica construida con React + Vite para visualizar, consultar y comparar capas geográficas publicadas desde GeoServer mediante WMS. La vista de mapa usa Leaflet.
 
 ## Requisitos
 
@@ -35,14 +35,6 @@ export const GEOSERVER_CONFIG = {
 
 Si cambias de servidor o workspace, actualiza esos valores. Las funciones del archivo construyen automáticamente las URLs WMS, WFS, GetLegendGraphic y GetFeatureInfo.
 
-## Vista 3D y terreno
-
-La vista 3D muestra el globo de CesiumJS sin configuración adicional. Para activar terreno real de Cesium World Terrain, crea un archivo `.env.local` con:
-
-```text
-VITE_CESIUM_ION_TOKEN=tu_token_de_cesium_ion
-```
-
 ## Configuración de capas
 
 Todas las capas editables están en `src/config/layers.js`. Para agregar una capa de GeoServer, añade un objeto con esta estructura:
@@ -60,6 +52,7 @@ Todas las capas editables están en `src/config/layers.js`. Para agregar una cap
   opacity: 0.8,
   queryable: true,
   legendUrl: null,
+  forceLegendLabels: false,
 }
 ```
 
@@ -76,6 +69,7 @@ Campos principales:
 - `opacity`: opacidad inicial entre `0` y `1`.
 - `queryable`: permite consultar atributos con GetFeatureInfo.
 - `legendUrl`: puede ser `null` para generar la leyenda automáticamente o una URL personalizada.
+- `forceLegendLabels`: usa `true` cuando la leyenda tiene una sola regla y GeoServer solo muestra el cuadro sin texto.
 
 ## Notas de operación
 
@@ -94,7 +88,6 @@ src/
     LayerPanel.jsx
     LegendPanel.jsx
     Map2D.jsx
-    Map3D.jsx
     LayerOpacityControl.jsx
     CompareLayers.jsx
     AttributePopup.jsx
@@ -104,7 +97,6 @@ src/
   pages/
     Home.jsx
     MapView.jsx
-    About.jsx
   styles/
     main.css
   App.jsx

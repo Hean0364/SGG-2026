@@ -38,6 +38,16 @@ export function buildWfsUrl(layerOrWorkspace = GEOSERVER_CONFIG.defaultWorkspace
   return buildWorkspaceServiceUrl("wfs", workspace);
 }
 
+function buildLegendOptions(layer, options) {
+  if (options.legendOptions) return options.legendOptions;
+  if (layer.legendOptions) return layer.legendOptions;
+  if (options.forceLegendLabels || layer.forceLegendLabels) {
+    return "forceLabels:on;fontAntiAliasing:true";
+  }
+
+  return "";
+}
+
 export function buildLegendUrl(layer, options = {}) {
   if (!layer || layer.service !== "wms") return "";
   if (layer.legendUrl) return layer.legendUrl;
@@ -51,6 +61,8 @@ export function buildLegendUrl(layer, options = {}) {
     transparent: "true",
   });
 
+  const legendOptions = buildLegendOptions(layer, options);
+  if (legendOptions) params.set("LEGEND_OPTIONS", legendOptions);
   if (layer.style) params.set("style", layer.style);
   if (options.width) params.set("width", String(options.width));
   if (options.height) params.set("height", String(options.height));

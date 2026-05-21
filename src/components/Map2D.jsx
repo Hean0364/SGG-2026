@@ -16,6 +16,63 @@ function getMapBbox(map) {
   return [southWest.x, southWest.y, northEast.x, northEast.y];
 }
 
+function getNiceScaleDistance(rawKilometers) {
+  if (!Number.isFinite(rawKilometers) || rawKilometers <= 0) return 0;
+
+  const exponent = Math.floor(Math.log10(rawKilometers));
+  const magnitude = 10 ** exponent;
+  const normalized = rawKilometers / magnitude;
+
+  if (normalized >= 5) return 5 * magnitude;
+  if (normalized >= 2) return 2 * magnitude;
+  return magnitude;
+}
+
+function formatScaleLabel(kilometers) {
+  if (kilometers < 1) return `${kilometers.toFixed(1)} km`;
+  return `${Math.round(kilometers)} km`;
+}
+
+function getMapScale(map) {
+  const maxWidth = 120;
+  const size = map.getSize();
+  const anchorY = Math.max(size.y - 24, 0);
+  const start = map.containerPointToLatLng([0, anchorY]);
+  const end = map.containerPointToLatLng([maxWidth, anchorY]);
+  const rawKilometers = start.distanceTo(end) / 1000;
+  const kilometers = getNiceScaleDistance(rawKilometers);
+
+  if (!kilometers || !Number.isFinite(rawKilometers) || rawKilometers <= 0) {
+    return { width: 80, label: "0 km" };
+  }
+
+  return {
+    width: Math.max(36, Math.round((kilometers / rawKilometers) * maxWidth)),
+    label: formatScaleLabel(kilometers),
+  };
+}
+
+function MapScale() {
+  const [scale, setScale] = useState({ width: 100, label: "0 km" });
+
+  const map = useMapEvents({
+    moveend: () => setScale(getMapScale(map)),
+    resize: () => setScale(getMapScale(map)),
+    zoomend: () => setScale(getMapScale(map)),
+  });
+
+  useEffect(() => {
+    setScale(getMapScale(map));
+  }, [map]);
+
+  return (
+    <div className="map-scale" aria-label={`Escala ${scale.label}`}>
+      <span>{scale.label}</span>
+      <div style={{ width: `${scale.width}px` }} />
+    </div>
+  );
+}
+
 function GeoServerWmsLayer({ layer, onLayerError }) {
   const map = useMap();
 
@@ -112,27 +169,33 @@ export default function Map2D({ layers, onLayerError }) {
   const wmsLayers = layers.filter((layer) => layer.service === "wms");
 
   return (
-    <MapContainer
-      className="map-canvas"
-      center={INITIAL_VIEW.center}
-      zoom={INITIAL_VIEW.zoom}
-      zoomControl
-      preferCanvas
-    >
-      {baseLayers.map((layer) => (
-        <TileLayer
-          key={layer.id}
-          url={layer.url}
-          attribution={layer.attribution}
-          opacity={layer.opacity}
-        />
-      ))}
+    <div className="map-perspective">
+      <MapContainer
+        className="map-canvas"
+        center={INITIAL_VIEW.center}
+        zoom={INITIAL_VIEW.zoom}
+        zoomControl
+        preferCanvas
+      >
+        {baseLayers.map((layer) => {
+          const tileOptions = {
+            attribution: layer.attribution,
+            opacity: layer.opacity,
+          };
 
-      {wmsLayers.map((layer) => (
-        <GeoServerWmsLayer key={layer.id} layer={layer} onLayerError={onLayerError} />
-      ))}
+          if (layer.subdomains) tileOptions.subdomains = layer.subdomains;
+          if (layer.maxZoom) tileOptions.maxZoom = layer.maxZoom;
 
-      <FeatureInfoHandler layers={layers} />
-    </MapContainer>
+          return <TileLayer key={layer.id} url={layer.url} {...tileOptions} />;
+        })}
+
+        {wmsLayers.map((layer) => (
+          <GeoServerWmsLayer key={layer.id} layer={layer} onLayerError={onLayerError} />
+        ))}
+
+        <MapScale />
+        <FeatureInfoHandler layers={layers} />
+      </MapContainer>
+    </div>
   );
 }

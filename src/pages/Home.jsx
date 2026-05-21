@@ -6,10 +6,6 @@ export default function Home({ navigate }) {
       <div className="home-hero">
         <div className="hero-copy">
           <h1>GIS Energía Eólica</h1>
-          <p>
-            Plataforma web para visualizar capas territoriales, consultar atributos y comparar
-            resultados de análisis geográfico publicados desde GeoServer.
-          </p>
           <button className="primary-action" type="button" onClick={() => navigate("map")}>
             <span>Entrar al mapa</span>
             <ArrowRight size={18} aria-hidden="true" />

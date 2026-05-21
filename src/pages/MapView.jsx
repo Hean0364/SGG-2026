@@ -1,8 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
-import { Box, Map as MapIcon } from "lucide-react";
+import { useCallback, useState } from "react";
 import Sidebar from "../components/Sidebar.jsx";
 import Map2D from "../components/Map2D.jsx";
-import Map3D from "../components/Map3D.jsx";
 import { MAP_LAYERS } from "../config/layers.js";
 
 function cloneInitialLayers() {
@@ -10,7 +8,6 @@ function cloneInitialLayers() {
 }
 
 export default function MapView() {
-  const [viewMode, setViewMode] = useState("2d");
   const [layers, setLayers] = useState(cloneInitialLayers);
   const [selectedLegendLayerId, setSelectedLegendLayerId] = useState("departamentos");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -20,11 +17,6 @@ export default function MapView() {
     layerBId: "idoneidad_eolica",
   });
 
-  const visibleLayerCount = useMemo(
-    () => layers.filter((layer) => layer.visible && layer.service === "wms").length,
-    [layers],
-  );
-
   const updateLayer = useCallback((layerId, updater) => {
     setLayers((currentLayers) =>
       currentLayers.map((layer) => (layer.id === layerId ? updater(layer) : layer)),
@@ -33,14 +25,24 @@ export default function MapView() {
 
   const handleToggleLayer = useCallback(
     (layerId) => {
-      updateLayer(layerId, (layer) => ({ ...layer, visible: !layer.visible }));
+      setLayers((currentLayers) => {
+        const selectedLayer = currentLayers.find((layer) => layer.id === layerId);
+
+        return currentLayers.map((layer) => {
+          if (selectedLayer?.service === "tile" && layer.service === "tile") {
+            return { ...layer, visible: layer.id === layerId };
+          }
+
+          return layer.id === layerId ? { ...layer, visible: !layer.visible } : layer;
+        });
+      });
       setLayerErrors((current) => {
         const next = { ...current };
         delete next[layerId];
         return next;
       });
     },
-    [updateLayer],
+    [],
   );
 
   const handleOpacityChange = useCallback(
@@ -49,6 +51,15 @@ export default function MapView() {
     },
     [updateLayer],
   );
+
+  const handleDisableAllLayers = useCallback(() => {
+    setLayers((currentLayers) =>
+      currentLayers.map((layer) =>
+        layer.service === "tile" ? layer : { ...layer, visible: false },
+      ),
+    );
+    setLayerErrors({});
+  }, []);
 
   const handleShowLegend = useCallback((layerId) => {
     if (!layerId) return;
@@ -79,45 +90,14 @@ export default function MapView() {
         onToggleCollapsed={() => setIsSidebarCollapsed((current) => !current)}
         onToggleLayer={handleToggleLayer}
         onOpacityChange={handleOpacityChange}
+        onDisableAllLayers={handleDisableAllLayers}
         onShowLegend={handleShowLegend}
         onCompareLayerChange={handleCompareLayerChange}
       />
 
       <div className="map-workspace">
-        <div className="map-toolbar">
-          <div>
-            <span className="toolbar-label">Vista activa</span>
-            <strong>{viewMode === "2d" ? "Leaflet 2D" : "CesiumJS 3D"}</strong>
-          </div>
-
-          <div className="segmented-control" role="group" aria-label="Cambiar vista">
-            <button
-              type="button"
-              className={viewMode === "2d" ? "active" : ""}
-              onClick={() => setViewMode("2d")}
-            >
-              <MapIcon size={16} aria-hidden="true" />
-              <span>2D</span>
-            </button>
-            <button
-              type="button"
-              className={viewMode === "3d" ? "active" : ""}
-              onClick={() => setViewMode("3d")}
-            >
-              <Box size={16} aria-hidden="true" />
-              <span>3D</span>
-            </button>
-          </div>
-
-          <span className="active-layer-counter">{visibleLayerCount} WMS activas</span>
-        </div>
-
         <div className="map-frame">
-          {viewMode === "2d" ? (
-            <Map2D layers={layers} onLayerError={handleLayerError} />
-          ) : (
-            <Map3D layers={layers} onLayerError={handleLayerError} />
-          )}
+          <Map2D layers={layers} onLayerError={handleLayerError} />
         </div>
       </div>
     </section>

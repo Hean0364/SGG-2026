@@ -12,6 +12,7 @@ export default function Sidebar({
   onToggleCollapsed,
   onToggleLayer,
   onOpacityChange,
+  onDisableAllLayers,
   onShowLegend,
   onCompareLayerChange,
 }) {
@@ -37,7 +38,7 @@ export default function Sidebar({
             layerErrors={layerErrors}
             onToggleLayer={onToggleLayer}
             onOpacityChange={onOpacityChange}
-            onShowLegend={onShowLegend}
+            onDisableAllLayers={onDisableAllLayers}
           />
           <LegendPanel
             layers={layers}

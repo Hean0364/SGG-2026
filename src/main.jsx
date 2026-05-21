@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "leaflet/dist/leaflet.css";
-import "cesium/Build/Cesium/Widgets/widgets.css";
 import "./styles/main.css";
 import App from "./App.jsx";
 
