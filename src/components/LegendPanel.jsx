@@ -14,7 +14,7 @@ export default function LegendPanel({ layers, selectedLayerId, onSelectLayer }) 
   return (
     <section className="panel-section" aria-labelledby="legend-heading">
       <div className="section-title-row">
-        <h2 id="legend-heading">Leyenda</h2>
+        <h2 id="legend-heading">Simbología</h2>
         <ListTree size={18} aria-hidden="true" />
       </div>
 
@@ -37,13 +37,13 @@ export default function LegendPanel({ layers, selectedLayerId, onSelectLayer }) 
       <div className="legend-preview">
         {selectedLayer ? (
           failedLegends[selectedLayer.id] ? (
-            <p className="empty-state">La leyenda no está disponible para esta capa.</p>
+            <p className="empty-state">La simbología no está disponible para esta capa.</p>
           ) : (
             <>
               <strong>{selectedLayer.name}</strong>
               <img
                 src={buildLegendUrl(selectedLayer)}
-                alt={`Leyenda de ${selectedLayer.name}`}
+                alt={`Simbología de ${selectedLayer.name}`}
                 onError={() =>
                   setFailedLegends((current) => ({ ...current, [selectedLayer.id]: true }))
                 }

@@ -19,17 +19,17 @@ function LayerLegendDropdown({ layer, failed, onLegendError }) {
       <summary>
         <span className="layer-legend-title">
           <Image size={15} aria-hidden="true" />
-          Leyenda
+          Simbología
         </span>
       </summary>
 
       <div className="layer-legend-content">
         {failed || !legendUrl ? (
-          <p className="empty-state">La leyenda no esta disponible para esta capa.</p>
+          <p className="empty-state">La simbología no esta disponible para esta capa.</p>
         ) : (
           <img
             src={legendUrl}
-            alt={`Leyenda de ${layer.name}`}
+            alt={`Simbología de ${layer.name}`}
             loading="lazy"
             onError={() => onLegendError(layer.id)}
           />
